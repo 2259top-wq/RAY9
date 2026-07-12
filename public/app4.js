@@ -175,15 +175,49 @@ function renderCharts(data) {
 
     (data || []).forEach(d => {
         // Robust timezone-independent partitioning
-        if (d.hhmm >= 800 && d.hhmm < 1400) {
+        if (d.hhmm >= 845 && d.hhmm < 1400) {
             dayData.push(d);
         } else {
             nightData.push(d);
         }
     });
 
-    priceChartDay = createChart(els.chartContainerDay, dayData, els.noDataMsgDay, 'day');
-    priceChartNight = createChart(els.chartContainerNight, nightData, els.noDataMsgNight, 'night');
+    const paddedDayData = padSessionData(dayData, 'day');
+    const paddedNightData = padSessionData(nightData, 'night');
+
+    priceChartDay = createChart(els.chartContainerDay, paddedDayData, els.noDataMsgDay, 'day');
+    priceChartNight = createChart(els.chartContainerNight, paddedNightData, els.noDataMsgNight, 'night');
+}
+
+function padSessionData(data, sessionType) {
+    if (!data || data.length === 0) return [];
+    
+    const firstPoint = data[0];
+    const firstHhmm = firstPoint.hhmm;
+    const hours = Math.floor(firstHhmm / 100);
+    const mins = firstHhmm % 100;
+    
+    const midnightTimestamp = firstPoint.time - (hours * 3600 + mins * 60);
+    let startTimestamp;
+    
+    if (sessionType === 'day') {
+        startTimestamp = midnightTimestamp + 8 * 3600 + 45 * 60;
+    } else {
+        if (firstHhmm < 1500) {
+            // First trade is past midnight, start was previous day 15:00
+            startTimestamp = midnightTimestamp - 24 * 3600 + 15 * 3600;
+        } else {
+            // First trade is same day, start is today 15:00
+            startTimestamp = midnightTimestamp + 15 * 3600;
+        }
+    }
+    
+    const padding = [];
+    for (let t = startTimestamp; t < firstPoint.time; t += 60) {
+        padding.push({ time: t }); // Whitespace data item
+    }
+    
+    return padding.concat(data);
 }
 
 function createChart(container, data, msgEl, sessionType) {
@@ -271,11 +305,13 @@ function createChart(container, data, msgEl, sessionType) {
     candleSeries.setData(data);
 
     // Add Opening Price Reference Line
-    let openCandle = data[0];
+    let openCandle = data.find(d => d.open !== undefined);
+    if (!openCandle) return priceChart; // Should not happen, but safe check
+
     if (sessionType === 'day') {
-        openCandle = data.find(d => d.hhmm >= 845) || data[0];
+        openCandle = data.find(d => d.open !== undefined && d.hhmm >= 845) || openCandle;
     } else if (sessionType === 'night') {
-        openCandle = data.find(d => d.hhmm >= 1500) || data[0];
+        openCandle = data.find(d => d.open !== undefined && d.hhmm >= 1500) || openCandle;
     }
     const sessionOpenPrice = openCandle.open;
 
