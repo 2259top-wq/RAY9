@@ -306,7 +306,7 @@ function createChart(container, data, msgEl, sessionType) {
 
     // Add Opening Price Reference Line
     let openCandle = data.find(d => d.open !== undefined);
-    if (!openCandle) return priceChart; // Should not happen, but safe check
+    if (!openCandle) return chart; // Should not happen, but safe check
 
     if (sessionType === 'day') {
         openCandle = data.find(d => d.open !== undefined && d.hhmm >= 845) || openCandle;
@@ -337,11 +337,16 @@ function createChart(container, data, msgEl, sessionType) {
         },
     });
 
-    const volumeData = data.map(d => ({
-        time: d.time,
-        value: d.volume,
-        color: d.close >= d.open ? 'rgba(229, 62, 62, 0.4)' : 'rgba(5, 150, 105, 0.4)'
-    }));
+    const volumeData = data.map(d => {
+        if (d.volume === undefined) {
+            return { time: d.time };
+        }
+        return {
+            time: d.time,
+            value: d.volume,
+            color: d.close >= d.open ? 'rgba(229, 62, 62, 0.4)' : 'rgba(5, 150, 105, 0.4)'
+        };
+    });
 
     volumeSeries.setData(volumeData);
 
