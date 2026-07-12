@@ -78,6 +78,13 @@
                         <span class="stat-value" id="stat-low">-</span>
                     </div>
                 </div>
+                <div class="chart-controls glass-card" style="display: flex; align-items: center; padding: 0 15px; margin-left: 15px; height: 100%;">
+                    <span class="stat-label" style="margin-right: 10px; font-weight: 500; color: #64748b;">圖表類型</span>
+                    <select id="chart-type-select" style="background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 4px 8px; font-family: inherit; font-size: 14px; outline: none; cursor: pointer; color: #1e293b;">
+                        <option value="candle">K線圖 (Candlestick)</option>
+                        <option value="line">價位線 (Line)</option>
+                    </select>
+                </div>
             </header>
 
             <div class="charts-wrapper" style="display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto;">
@@ -95,6 +102,6 @@
         </main>
     </div>
 
-    <script src="app4.js?v=11"></script>
+    <script src="app4.js?v=12"></script>
 </body>
 </html>

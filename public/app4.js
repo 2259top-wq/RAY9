@@ -19,11 +19,14 @@ const els = {
     statHigh: document.getElementById('stat-high'),
     statLow: document.getElementById('stat-low'),
     chartContainerDay: document.getElementById('priceChartDay'),
-    chartContainerNight: document.getElementById('priceChartNight')
+    chartContainerNight: document.getElementById('priceChartNight'),
+    chartTypeSelect: document.getElementById('chart-type-select')
 };
 
+// State
 let priceChartDay = null;
 let priceChartNight = null;
+let currentDataCache = null;
 
 // Initialize App
 async function init() {
@@ -58,6 +61,12 @@ async function init() {
         els.typeSelect.addEventListener('change', updateValidParams);
 
         els.queryBtn.addEventListener('click', handleQuery);
+
+        els.chartTypeSelect.addEventListener('change', () => {
+            if (currentDataCache) {
+                renderCharts(currentDataCache);
+            }
+        });
         
         // Auto-load data for the default parameters
         handleQuery();
@@ -129,6 +138,7 @@ async function handleQuery() {
         const res = await fetch(`${API_BASE}/query?${params}`);
         const data = await res.json();
         
+        currentDataCache = data;
         renderCharts(data);
         updateStats(data);
         
@@ -310,17 +320,36 @@ function createChart(container, data, msgEl, sessionType) {
         },
     });
 
-    // Taiwanese candlestick colors (Red = Up, Green = Down)
-    // Premium soft colors
-    const candleSeries = chart.addCandlestickSeries({
-        upColor: '#e53e3e',
-        downColor: '#059669',
-        borderVisible: false,
-        wickUpColor: '#e53e3e',
-        wickDownColor: '#059669'
-    });
-    
-    candleSeries.setData(data);
+    const chartType = els.chartTypeSelect.value;
+    let priceSeries;
+
+    if (chartType === 'line') {
+        priceSeries = chart.addLineSeries({
+            color: '#2563eb', // Clean blue line
+            lineWidth: 2,
+            crosshairMarkerVisible: true,
+            crosshairMarkerRadius: 4,
+            crosshairMarkerBorderColor: '#ffffff',
+            crosshairMarkerBackgroundColor: '#2563eb',
+        });
+        
+        const lineData = data.map(d => ({
+            time: d.time,
+            value: d.close !== undefined ? d.close : d.value
+        }));
+        priceSeries.setData(lineData);
+        
+    } else {
+        // Taiwanese candlestick colors (Red = Up, Green = Down)
+        priceSeries = chart.addCandlestickSeries({
+            upColor: '#e53e3e',
+            downColor: '#059669',
+            borderVisible: false,
+            wickUpColor: '#e53e3e',
+            wickDownColor: '#059669'
+        });
+        priceSeries.setData(data);
+    }
 
     // Add Opening Price Reference Line
     let openCandle = data.find(d => d.open !== undefined);
@@ -333,9 +362,9 @@ function createChart(container, data, msgEl, sessionType) {
     }
     const sessionOpenPrice = openCandle.open;
 
-    candleSeries.createPriceLine({
+    priceSeries.createPriceLine({
         price: sessionOpenPrice,
-        color: '#2563eb', // Blue for reference
+        color: '#f59e0b', // Changed to amber/orange so it contrasts with the blue line chart
         lineWidth: 2,
         lineStyle: 1, // Dotted
         axisLabelVisible: true,
