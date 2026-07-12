@@ -6,9 +6,8 @@
     <title>選擇權回測系統 PRO</title>
     <meta name="description" content="Interactive time-series analysis for Options Daily Data">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -19,48 +18,39 @@
                 <h1>選擇權回測系統</h1>
             </div>
 
-            <!-- CSV Upload Zone -->
-            <div class="upload-zone" id="uploadZone">
-                <input type="file" id="csvFileInput" accept=".csv" class="hidden-input">
-                <div class="upload-content">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    <p id="uploadText">點擊或拖曳 CSV 檔</p>
-                </div>
-            </div>
-
             <div class="filters-container">
                 <div class="filter-group">
                     <label for="date-select">交易日期 (Date)</label>
                     <div class="select-wrapper">
-                        <select id="date-select" disabled><option>等待上傳...</option></select>
+                        <select id="date-select" disabled><option>載入中...</option></select>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <label for="contract-select">契約名稱 (Contract)</label>
                     <div class="select-wrapper">
-                        <select id="contract-select" disabled><option>等待上傳...</option></select>
+                        <select id="contract-select" disabled><option>載入中...</option></select>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <label for="expiry-select">到期月份 (Expiry)</label>
                     <div class="select-wrapper">
-                        <select id="expiry-select" disabled><option>等待上傳...</option></select>
+                        <select id="expiry-select" disabled><option>載入中...</option></select>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <label for="type-select">買賣權 (Type)</label>
                     <div class="select-wrapper">
-                        <select id="type-select" disabled><option>等待上傳...</option></select>
+                        <select id="type-select" disabled><option>載入中...</option></select>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <label for="strike-select">履約價 (Strike)</label>
                     <div class="select-wrapper">
-                        <select id="strike-select" disabled><option>等待上傳...</option></select>
+                        <select id="strike-select" disabled><option>載入中...</option></select>
                     </div>
                 </div>
 
