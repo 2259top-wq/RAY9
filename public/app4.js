@@ -463,7 +463,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         });
         volumeSeries.setData(volumeData);
 
-        activeSeries.push({ priceSeries, volumeSeries, title, colorLine });
+        activeSeries.push({ priceSeries, volumeSeries, title, colorLine, data: dataArr });
     }
 
     if (isOverlay) {
@@ -499,9 +499,21 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         let html = `<div style="font-weight: 600; font-size: 16px; margin-bottom: 4px; color: #1e293b;">${hh}:${mm}</div>`;
         
         activeSeries.forEach(s => {
-            const priceData = param.seriesData.get(s.priceSeries);
+            let priceData = param.seriesData.get(s.priceSeries);
+            let volData = param.seriesData.get(s.volumeSeries);
+
+            if (!priceData && s.data) {
+                // Find last known data point
+                for (let i = s.data.length - 1; i >= 0; i--) {
+                    if (s.data[i].time <= param.time) {
+                        priceData = s.data[i];
+                        volData = { value: 0 };
+                        break;
+                    }
+                }
+            }
+
             const price = priceData !== undefined ? (priceData.value !== undefined ? priceData.value.toFixed(2) : (priceData.close !== undefined ? priceData.close.toFixed(2) : 'N/A')) : 'N/A';
-            const volData = param.seriesData.get(s.volumeSeries);
             const vol = volData !== undefined ? volData.value : '0';
             
             if (price !== 'N/A') {
