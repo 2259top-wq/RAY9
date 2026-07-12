@@ -282,7 +282,7 @@ function createChart(container, data, msgEl, sessionType, watermarkText) {
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
         },
         watermark: {
-            color: 'rgba(0, 0, 0, 0.04)',
+            color: 'rgba(0, 0, 0, 0.12)', // Darker watermark color as requested
             visible: !!watermarkText,
             text: watermarkText || '',
             fontSize: 48,
