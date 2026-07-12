@@ -20,7 +20,8 @@ const els = {
     statLow: document.getElementById('stat-low'),
     chartContainerDay: document.getElementById('priceChartDay'),
     chartContainerNight: document.getElementById('priceChartNight'),
-    chartTypeSelect: document.getElementById('chart-type-select')
+    chartTypeSelect: document.getElementById('chart-type-select'),
+    displayModeSelect: document.getElementById('display-mode-select')
 };
 
 // State
@@ -66,6 +67,11 @@ async function init() {
             if (currentDataCache) {
                 renderCharts(currentDataCache);
             }
+        });
+        
+        els.displayModeSelect.addEventListener('change', () => {
+            els.typeSelect.disabled = (els.displayModeSelect.value === 'overlay');
+            handleQuery();
         });
         
         // Auto-load data for the default parameters
@@ -134,13 +140,35 @@ async function handleQuery() {
         strike: els.strikeSelect.value
     });
 
+    const displayMode = els.displayModeSelect.value;
+
     try {
-        const res = await fetch(`${API_BASE}/query?${params}`);
-        const data = await res.json();
-        
-        currentDataCache = data;
-        renderCharts(data);
-        updateStats(data);
+        if (displayMode === 'overlay') {
+            // Fetch both C and P
+            const paramsC = new URLSearchParams(params);
+            paramsC.set('type', 'C');
+            const paramsP = new URLSearchParams(params);
+            paramsP.set('type', 'P');
+            
+            const [resC, resP] = await Promise.all([
+                fetch(`${API_BASE}/query?${paramsC}`),
+                fetch(`${API_BASE}/query?${paramsP}`)
+            ]);
+            
+            const dataC = await resC.json();
+            const dataP = await resP.json();
+            
+            currentDataCache = { mode: 'overlay', C: dataC, P: dataP };
+            renderCharts(currentDataCache);
+            updateStats(dataC); // Using C for stats in overlay mode
+        } else {
+            const res = await fetch(`${API_BASE}/query?${params}`);
+            const data = await res.json();
+            
+            currentDataCache = { mode: 'single', data: data };
+            renderCharts(currentDataCache);
+            updateStats(data);
+        }
         
     } catch (err) {
         console.error('Query failed:', err);
@@ -190,29 +218,49 @@ function formatWatermarkDate(dateStr) {
     return `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')} (${weekday})`;
 }
 
-function renderCharts(data) {
-    if (priceChartDay) priceChartDay.remove();
-    if (priceChartNight) priceChartNight.remove();
-
+function partitionData(dataArr) {
     const dayData = [];
     const nightData = [];
-
-    (data || []).forEach(d => {
-        // Robust timezone-independent partitioning
+    (dataArr || []).forEach(d => {
         if (d.hhmm >= 845 && d.hhmm < 1400) {
             dayData.push(d);
         } else {
             nightData.push(d);
         }
     });
+    return { dayData, nightData };
+}
 
-    const paddedDayData = padSessionData(dayData, 'day');
-    const paddedNightData = padSessionData(nightData, 'night');
+function renderCharts(cacheObj) {
+    if (priceChartDay) priceChartDay.remove();
+    if (priceChartNight) priceChartNight.remove();
+
+    let chartDataObjDay = {};
+    let chartDataObjNight = {};
+
+    if (cacheObj.mode === 'single') {
+        const { dayData, nightData } = partitionData(cacheObj.data);
+        chartDataObjDay = { mode: 'single', data: padSessionData(dayData, 'day') };
+        chartDataObjNight = { mode: 'single', data: padSessionData(nightData, 'night') };
+    } else if (cacheObj.mode === 'overlay') {
+        const cPartition = partitionData(cacheObj.C);
+        const pPartition = partitionData(cacheObj.P);
+        chartDataObjDay = { 
+            mode: 'overlay', 
+            C: padSessionData(cPartition.dayData, 'day'), 
+            P: padSessionData(pPartition.dayData, 'day') 
+        };
+        chartDataObjNight = { 
+            mode: 'overlay', 
+            C: padSessionData(cPartition.nightData, 'night'), 
+            P: padSessionData(pPartition.nightData, 'night') 
+        };
+    }
 
     const watermarkText = formatWatermarkDate(els.dateSelect.value);
 
-    priceChartDay = createChart(els.chartContainerDay, paddedDayData, els.noDataMsgDay, 'day', watermarkText);
-    priceChartNight = createChart(els.chartContainerNight, paddedNightData, els.noDataMsgNight, 'night', watermarkText);
+    priceChartDay = createChart(els.chartContainerDay, chartDataObjDay, els.noDataMsgDay, 'day', watermarkText);
+    priceChartNight = createChart(els.chartContainerNight, chartDataObjNight, els.noDataMsgNight, 'night', watermarkText);
 }
 
 function padSessionData(data, sessionType) {
@@ -261,8 +309,14 @@ function padSessionData(data, sessionType) {
     return padding.concat(data);
 }
 
-function createChart(container, data, msgEl, sessionType, watermarkText) {
-    if (!data || data.length === 0) {
+function createChart(container, chartDataObj, msgEl, sessionType, watermarkText) {
+    const isOverlay = chartDataObj.mode === 'overlay';
+    
+    const hasDataC = isOverlay && chartDataObj.C && chartDataObj.C.length > 0;
+    const hasDataP = isOverlay && chartDataObj.P && chartDataObj.P.length > 0;
+    const hasSingleData = !isOverlay && chartDataObj.data && chartDataObj.data.length > 0;
+
+    if (!hasSingleData && !hasDataC && !hasDataP) {
         msgEl.textContent = '此時段無交易資料。';
         msgEl.classList.remove('hidden');
         return null;
@@ -341,82 +395,91 @@ function createChart(container, data, msgEl, sessionType, watermarkText) {
         },
     });
 
-    const chartType = els.chartTypeSelect.value;
-    let priceSeries;
+    const chartType = isOverlay ? 'line' : els.chartTypeSelect.value;
 
-    if (chartType === 'line') {
-        priceSeries = chart.addLineSeries({
-            color: '#2563eb', // Clean blue line
-            lineWidth: 2,
-            crosshairMarkerVisible: true,
-            crosshairMarkerRadius: 4,
-            crosshairMarkerBorderColor: '#ffffff',
-            crosshairMarkerBackgroundColor: '#2563eb',
-        });
+    function addSeriesAndVolume(dataArr, colorLine, title, isOverlaySecondary) {
+        if (!dataArr || dataArr.length === 0) return;
         
-        const lineData = data.map(d => ({
-            time: d.time,
-            value: d.close !== undefined ? d.close : d.value
-        }));
-        priceSeries.setData(lineData);
-        
-    } else {
-        // Taiwanese candlestick colors (Red = Up, Green = Down)
-        priceSeries = chart.addCandlestickSeries({
-            upColor: '#e53e3e',
-            downColor: '#059669',
-            borderVisible: false,
-            wickUpColor: '#e53e3e',
-            wickDownColor: '#059669'
-        });
-        priceSeries.setData(data);
-    }
-
-    // Add Opening Price Reference Line
-    let openCandle = data.find(d => d.open !== undefined);
-    if (!openCandle) return chart; // Should not happen, but safe check
-
-    if (sessionType === 'day') {
-        openCandle = data.find(d => d.open !== undefined && d.hhmm >= 845) || openCandle;
-    } else if (sessionType === 'night') {
-        openCandle = data.find(d => d.open !== undefined && d.hhmm >= 1500) || openCandle;
-    }
-    const sessionOpenPrice = openCandle.open;
-
-    priceSeries.createPriceLine({
-        price: sessionOpenPrice,
-        color: '#f59e0b', // Changed to amber/orange so it contrasts with the blue line chart
-        lineWidth: 2,
-        lineStyle: 1, // Dotted
-        axisLabelVisible: true,
-        title: '開盤',
-    });
-
-    const volumeSeries = chart.addHistogramSeries({
-        color: '#26a69a',
-        priceFormat: { type: 'volume' },
-        priceScaleId: '', // Overlay on the same scale but pin to bottom
-    });
-
-    volumeSeries.priceScale().applyOptions({
-        scaleMargins: {
-            top: 0.85, // volume takes up bottom 15%
-            bottom: 0,
-        },
-    });
-
-    const volumeData = data.map(d => {
-        if (d.volume === undefined) {
-            return { time: d.time };
+        let priceSeries;
+        if (chartType === 'line') {
+            priceSeries = chart.addLineSeries({
+                color: colorLine,
+                lineWidth: 2,
+                title: title,
+                crosshairMarkerVisible: true,
+                crosshairMarkerRadius: 4,
+                crosshairMarkerBorderColor: '#ffffff',
+                crosshairMarkerBackgroundColor: colorLine,
+            });
+            const lineData = dataArr.map(d => ({
+                time: d.time,
+                value: d.close !== undefined ? d.close : d.value
+            }));
+            priceSeries.setData(lineData);
+        } else {
+            priceSeries = chart.addCandlestickSeries({
+                upColor: '#e53e3e',
+                downColor: '#059669',
+                borderVisible: false,
+                wickUpColor: '#e53e3e',
+                wickDownColor: '#059669'
+            });
+            priceSeries.setData(dataArr);
         }
-        return {
-            time: d.time,
-            value: d.volume,
-            color: d.close >= d.open ? 'rgba(229, 62, 62, 0.4)' : 'rgba(5, 150, 105, 0.4)'
-        };
-    });
 
-    volumeSeries.setData(volumeData);
+        // Add Opening Price Reference Line
+        let openCandle = dataArr.find(d => d.open !== undefined);
+        if (openCandle) {
+            if (sessionType === 'day') {
+                openCandle = dataArr.find(d => d.open !== undefined && d.hhmm >= 845) || openCandle;
+            } else if (sessionType === 'night') {
+                openCandle = dataArr.find(d => d.open !== undefined && d.hhmm >= 1500) || openCandle;
+            }
+            priceSeries.createPriceLine({
+                price: openCandle.open,
+                color: colorLine === '#2563eb' ? '#f59e0b' : colorLine, // Use amber if blue line, else match line color
+                lineWidth: 1,
+                lineStyle: 1, // Dotted
+                axisLabelVisible: true,
+                title: title + ' 開盤',
+            });
+        }
+
+        // Add Volume
+        const volumeSeries = chart.addHistogramSeries({
+            color: colorLine,
+            priceFormat: { type: 'volume' },
+            priceScaleId: '', // Overlay on the same scale but pin to bottom
+        });
+
+        volumeSeries.priceScale().applyOptions({
+            scaleMargins: {
+                top: 0.85,
+                bottom: 0,
+            },
+        });
+
+        const volumeData = dataArr.map(d => {
+            if (d.volume === undefined) return { time: d.time };
+            let volColor;
+            if (isOverlay) {
+                volColor = colorLine === '#e53e3e' ? 'rgba(229, 62, 62, 0.3)' : 'rgba(5, 150, 105, 0.3)';
+            } else {
+                volColor = d.close >= d.open ? 'rgba(229, 62, 62, 0.4)' : 'rgba(5, 150, 105, 0.4)';
+            }
+            return { time: d.time, value: d.volume, color: volColor };
+        });
+        volumeSeries.setData(volumeData);
+    }
+
+    if (isOverlay) {
+        // Red for Call, Green for Put
+        addSeriesAndVolume(chartDataObj.C, '#e53e3e', 'Call', false);
+        addSeriesAndVolume(chartDataObj.P, '#059669', 'Put', true);
+    } else {
+        // Default Blue for line chart
+        addSeriesAndVolume(chartDataObj.data, '#2563eb', '', false);
+    }
 
     // Force the chart to show all data including our padded candles
     chart.timeScale().fitContent();
