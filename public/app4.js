@@ -207,8 +207,8 @@ function createChart(container, data, msgEl) {
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
         },
         grid: {
-            vertLines: { color: 'rgba(0, 0, 0, 0.06)', style: 1 }, // 1 is Dotted
-            horzLines: { color: 'rgba(0, 0, 0, 0.04)', style: 1 }
+            vertLines: { color: 'rgba(0, 0, 0, 0.15)', style: 1 }, // 1 is Dotted
+            horzLines: { color: 'rgba(0, 0, 0, 0.12)', style: 1 }
         },
         timeScale: {
             timeVisible: true,
