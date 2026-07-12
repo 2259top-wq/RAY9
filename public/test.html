@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chart Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body style="margin: 0; padding: 20px;">
+    <h2>Basic Chart Test</h2>
+    <div id="chart" style="width: 800px; height: 400px; border: 1px solid red;"></div>
+    <script>
+        try {
+            const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                width: 800,
+                height: 400
+            });
+            const lineSeries = chart.addLineSeries();
+            lineSeries.setData([
+                { time: '2019-04-11', value: 80.01 },
+                { time: '2019-04-12', value: 96.63 },
+                { time: '2019-04-13', value: 76.64 },
+                { time: '2019-04-14', value: 81.89 },
+                { time: '2019-04-15', value: 74.43 },
+            ]);
+            document.body.insertAdjacentHTML('beforeend', '<p style="color: green;">Chart rendered successfully!</p>');
+        } catch (e) {
+            document.body.insertAdjacentHTML('beforeend', '<p style="color: red;">Error: ' + e.message + '</p>');
+        }
+    </script>
+</body>
+</html>

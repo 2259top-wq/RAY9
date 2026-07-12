@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇權回測系統 PRO</title>
+    <meta name="description" content="Interactive time-series analysis for Options Daily Data">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=8">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Filters -->
+        <aside class="glass-sidebar">
+            <div class="sidebar-header">
+                <div class="logo"></div>
+                <h1>選擇權回測系統</h1>
+            </div>
+
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="date-select">交易日期 (Date)</label>
+                    <div class="select-wrapper">
+                        <select id="date-select" disabled><option>載入中...</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="contract-select">契約名稱 (Contract)</label>
+                    <div class="select-wrapper">
+                        <select id="contract-select" disabled><option>載入中...</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="expiry-select">到期月份 (Expiry)</label>
+                    <div class="select-wrapper">
+                        <select id="expiry-select" disabled><option>載入中...</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="type-select">買賣權 (Type)</label>
+                    <div class="select-wrapper">
+                        <select id="type-select" disabled><option>載入中...</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="strike-select">履約價 (Strike)</label>
+                    <div class="select-wrapper">
+                        <select id="strike-select" disabled><option>載入中...</option></select>
+                    </div>
+                </div>
+
+                <button id="query-btn" class="primary-btn" disabled>
+                    <span class="btn-text">查詢資料</span>
+                    <div class="spinner hidden"></div>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-nav">
+                <div class="stats-bar">
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">總成交量</span>
+                        <span class="stat-value" id="stat-volume">-</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">最高價</span>
+                        <span class="stat-value" id="stat-high">-</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">最低價</span>
+                        <span class="stat-value" id="stat-low">-</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="charts-wrapper" style="display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto;">
+                <div class="chart-container glass-card" style="flex: 1; min-height: 400px; display: flex; flex-direction: column;">
+                    <h3 class="chart-title" style="margin-top: 0; color: #64748b; font-weight: 500; padding: 10px 20px 0;">日盤 (08:45 - 13:45)</h3>
+                    <div id="no-data-msg-day" class="empty-state">此時段無交易資料</div>
+                    <div id="priceChartDay" style="flex: 1; width: 100%; position: relative;"></div>
+                </div>
+                <div class="chart-container glass-card" style="flex: 1; min-height: 400px; display: flex; flex-direction: column;">
+                    <h3 class="chart-title" style="margin-top: 0; color: #64748b; font-weight: 500; padding: 10px 20px 0;">夜盤 (15:00 - 05:00)</h3>
+                    <div id="no-data-msg-night" class="empty-state">此時段無交易資料</div>
+                    <div id="priceChartNight" style="flex: 1; width: 100%; position: relative;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app4.js?v=3"></script>
+</body>
+</html>
