@@ -207,8 +207,8 @@ function createChart(container, data, msgEl) {
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
         },
         grid: {
-            vertLines: { color: 'rgba(0, 0, 0, 0.15)', style: 1 }, // 1 is Dotted
-            horzLines: { color: 'rgba(0, 0, 0, 0.12)', style: 1 }
+            vertLines: { color: 'rgba(0, 0, 0, 0.3)', style: 1 }, // 1 is Dotted
+            horzLines: { color: 'rgba(0, 0, 0, 0.2)', style: 1 }
         },
         timeScale: {
             timeVisible: true,
@@ -269,6 +269,17 @@ function createChart(container, data, msgEl) {
     });
     
     candleSeries.setData(data);
+
+    // Add Opening Price Reference Line
+    const sessionOpenPrice = data[0].open;
+    candleSeries.createPriceLine({
+        price: sessionOpenPrice,
+        color: '#2563eb', // Blue for reference
+        lineWidth: 2,
+        lineStyle: 1, // Dotted
+        axisLabelVisible: true,
+        title: '開盤',
+    });
 
     const volumeSeries = chart.addHistogramSeries({
         color: '#26a69a',
