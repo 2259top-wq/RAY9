@@ -1,5 +1,8 @@
 const API_BASE = '/api';
 
+console.log("=== Options Backtester v10 ===");
+// alert("如果你看到這個彈跳視窗，代表你已經成功更新到最新版 v10！");
+
 // UI Elements
 const els = {
     dateSelect: document.getElementById('date-select'),
