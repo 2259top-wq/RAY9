@@ -179,6 +179,17 @@ function updateStats(data) {
     els.statLow.textContent = low.toFixed(2);
 }
 
+function formatWatermarkDate(dateStr) {
+    if (!dateStr || dateStr.length !== 8) return '';
+    const yyyy = parseInt(dateStr.substring(0, 4), 10);
+    const mm = parseInt(dateStr.substring(4, 6), 10) - 1;
+    const dd = parseInt(dateStr.substring(6, 8), 10);
+    const d = new Date(yyyy, mm, dd);
+    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const weekday = weekdays[d.getDay()];
+    return `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')} (${weekday})`;
+}
+
 function renderCharts(data) {
     if (priceChartDay) priceChartDay.remove();
     if (priceChartNight) priceChartNight.remove();
@@ -198,8 +209,10 @@ function renderCharts(data) {
     const paddedDayData = padSessionData(dayData, 'day');
     const paddedNightData = padSessionData(nightData, 'night');
 
-    priceChartDay = createChart(els.chartContainerDay, paddedDayData, els.noDataMsgDay, 'day');
-    priceChartNight = createChart(els.chartContainerNight, paddedNightData, els.noDataMsgNight, 'night');
+    const watermarkText = formatWatermarkDate(els.dateSelect.value);
+
+    priceChartDay = createChart(els.chartContainerDay, paddedDayData, els.noDataMsgDay, 'day', watermarkText);
+    priceChartNight = createChart(els.chartContainerNight, paddedNightData, els.noDataMsgNight, 'night', watermarkText);
 }
 
 function padSessionData(data, sessionType) {
@@ -248,7 +261,7 @@ function padSessionData(data, sessionType) {
     return padding.concat(data);
 }
 
-function createChart(container, data, msgEl, sessionType) {
+function createChart(container, data, msgEl, sessionType, watermarkText) {
     if (!data || data.length === 0) {
         msgEl.textContent = '此時段無交易資料。';
         msgEl.classList.remove('hidden');
@@ -267,6 +280,14 @@ function createChart(container, data, msgEl, sessionType) {
             background: { type: 'solid', color: 'transparent' },
             textColor: '#86868b',
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+        },
+        watermark: {
+            color: 'rgba(0, 0, 0, 0.04)',
+            visible: !!watermarkText,
+            text: watermarkText || '',
+            fontSize: 48,
+            horzAlign: 'center',
+            vertAlign: 'center',
         },
         grid: {
             vertLines: { color: 'rgba(0, 0, 0, 0.3)', style: 1 }, // 1 is Dotted
