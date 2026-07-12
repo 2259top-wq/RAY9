@@ -9,4 +9,5 @@ echo.
 echo [2] 正在為您產生「手機專用」的公開網址...
 echo (如果看到 your url is: https://xxx，請在手機瀏覽器直接輸入該網址！)
 echo.
-npx --yes localtunnel --port 3000
+call npx --yes localtunnel --port 3000
+pause
