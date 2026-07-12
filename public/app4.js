@@ -205,6 +205,13 @@ function padSessionData(data, sessionType) {
     
     if (sessionType === 'day') {
         startTimestamp = midnightTimestamp + 8 * 3600 + 45 * 60;
+        // Fix: Make sure startTimestamp is strictly before firstPoint.time
+        if (startTimestamp > firstPoint.time) {
+            startTimestamp = firstPoint.time - (firstPoint.time % 86400) - (8 * 3600) + 8 * 3600 + 45 * 60; 
+            // In Taiwan timezone (UTC+8), local midnight is UTC 16:00 previous day
+            // It's safer to just step back from firstPoint.time if our calculation overshoot
+            while (startTimestamp > firstPoint.time) startTimestamp -= 86400;
+        }
     } else {
         if (firstHhmm < 1500) {
             // First trade is past midnight, start was previous day 15:00
@@ -360,6 +367,9 @@ function createChart(container, data, msgEl, sessionType) {
     });
 
     volumeSeries.setData(volumeData);
+
+    // Force the chart to show all data including our padded candles
+    chart.timeScale().fitContent();
 
     return chart;
 }
