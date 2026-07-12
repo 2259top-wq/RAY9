@@ -3,10 +3,31 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-const CSV_FILES = [
-  'C:\\Users\\Admin\\Downloads\\OptionsDaily_2026_07_07_extracted\\OptionsDaily_2026_07_07.csv',
-  'C:\\Users\\Admin\\Downloads\\OptionsDaily_2026_07_13\\OptionsDaily_2026_07_13.csv'
-];
+function getCsvFiles() {
+  const dir = 'C:\\\\Users\\\\Admin\\\\Downloads';
+  const csvFiles = [];
+  try {
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+      if (file.startsWith('OptionsDaily_')) {
+        const fullPath = path.join(dir, file);
+        if (fs.statSync(fullPath).isDirectory()) {
+          const subFiles = fs.readdirSync(fullPath);
+          for (const subFile of subFiles) {
+            if (subFile.endsWith('.csv')) {
+              csvFiles.push(path.join(fullPath, subFile));
+            }
+          }
+        } else if (file.endsWith('.csv')) {
+          csvFiles.push(fullPath);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error reading Downloads directory:', err);
+  }
+  return csvFiles;
+}
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = 3000;
 
@@ -24,7 +45,9 @@ let uniqueValues = {
 
 async function loadCSV() {
   console.log('Loading CSV data...');
-  for (const file of CSV_FILES) {
+  const filesToLoad = getCsvFiles();
+  console.log(`Found ${filesToLoad.length} CSV files to process.`);
+  for (const file of filesToLoad) {
     if (!fs.existsSync(file)) {
       console.error(`Error: CSV file not found at ${file}`);
       continue;
