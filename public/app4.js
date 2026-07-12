@@ -385,6 +385,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
     const originalRemove = chart.remove;
     chart.remove = function() {
         if (this._ro) this._ro.disconnect();
+        if (legend && legend.parentNode) legend.parentNode.removeChild(legend);
         originalRemove.call(this);
     };
 
@@ -396,6 +397,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
     });
 
     const chartType = isOverlay ? 'line' : els.chartTypeSelect.value;
+    const activeSeries = [];
 
     function addSeriesAndVolume(dataArr, colorLine, title, isOverlaySecondary) {
         if (!dataArr || dataArr.length === 0) return;
@@ -427,24 +429,6 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
             priceSeries.setData(dataArr);
         }
 
-        // Add Opening Price Reference Line
-        let openCandle = dataArr.find(d => d.open !== undefined);
-        if (openCandle) {
-            if (sessionType === 'day') {
-                openCandle = dataArr.find(d => d.open !== undefined && d.hhmm >= 845) || openCandle;
-            } else if (sessionType === 'night') {
-                openCandle = dataArr.find(d => d.open !== undefined && d.hhmm >= 1500) || openCandle;
-            }
-            priceSeries.createPriceLine({
-                price: openCandle.open,
-                color: colorLine === '#2563eb' ? '#f59e0b' : colorLine, // Use amber if blue line, else match line color
-                lineWidth: 1,
-                lineStyle: 1, // Dotted
-                axisLabelVisible: true,
-                title: title + ' 開盤',
-            });
-        }
-
         // Add Volume
         const volumeSeries = chart.addHistogramSeries({
             color: colorLine,
@@ -470,6 +454,8 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
             return { time: d.time, value: d.volume, color: volColor };
         });
         volumeSeries.setData(volumeData);
+
+        activeSeries.push({ priceSeries, volumeSeries, title, colorLine });
     }
 
     if (isOverlay) {
@@ -480,6 +466,46 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         // Default Blue for line chart
         addSeriesAndVolume(chartDataObj.data, '#2563eb', '', false);
     }
+
+    // Add floating legend
+    const legend = document.createElement('div');
+    legend.style.position = 'absolute';
+    legend.style.left = '16px';
+    legend.style.top = '12px';
+    legend.style.zIndex = '10';
+    legend.style.fontSize = '14px';
+    legend.style.lineHeight = '1.5';
+    legend.style.pointerEvents = 'none';
+    container.appendChild(legend);
+
+    chart.subscribeCrosshairMove(param => {
+        if (param.point === undefined || !param.time || param.point.x < 0 || param.point.y < 0) {
+            legend.innerHTML = '';
+            return;
+        }
+
+        const date = new Date(param.time * 1000);
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        
+        let html = `<div style="font-weight: 600; font-size: 16px; margin-bottom: 4px; color: #1e293b;">${hh}:${mm}</div>`;
+        
+        activeSeries.forEach(s => {
+            const priceData = param.seriesData.get(s.priceSeries);
+            const price = priceData !== undefined ? (priceData.value !== undefined ? priceData.value.toFixed(2) : (priceData.close !== undefined ? priceData.close.toFixed(2) : 'N/A')) : 'N/A';
+            const volData = param.seriesData.get(s.volumeSeries);
+            const vol = volData !== undefined ? volData.value : '0';
+            
+            if (price !== 'N/A') {
+                const titleStr = s.title ? `${s.title}: ` : '';
+                html += `<div style="color: ${s.colorLine}; font-weight: 500; display: flex; align-items: baseline; gap: 8px;">
+                    <span>${titleStr}$${price}</span>
+                    <span style="font-size: 12px; color: #64748b; font-weight: normal;">Vol: ${vol}</span>
+                </div>`;
+            }
+        });
+        legend.innerHTML = html;
+    });
 
     // Force the chart to show all data including our padded candles
     chart.timeScale().fitContent();
