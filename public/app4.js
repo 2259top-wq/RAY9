@@ -214,7 +214,15 @@ function padSessionData(data, sessionType) {
     
     const padding = [];
     for (let t = startTimestamp; t < firstPoint.time; t += 60) {
-        padding.push({ time: t }); // Whitespace data item
+        padding.push({ 
+            time: t,
+            open: firstPoint.open,
+            high: firstPoint.open,
+            low: firstPoint.open,
+            close: firstPoint.open,
+            volume: 0,
+            hhmm: -1 // Dummy hhmm so it doesn't get picked up as actual open
+        });
     }
     
     return padding.concat(data);
