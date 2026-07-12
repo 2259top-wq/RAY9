@@ -484,13 +484,21 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
     legend.style.fontSize = '14px';
     legend.style.lineHeight = '1.5';
     legend.style.pointerEvents = 'none';
+    legend.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'; // Solid background to prevent chart lines from blocking text
+    legend.style.padding = '8px 12px';
+    legend.style.borderRadius = '6px';
+    legend.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    legend.style.display = 'none'; // Hidden by default
     container.appendChild(legend);
 
     chart.subscribeCrosshairMove(param => {
         if (param.point === undefined || !param.time || param.point.x < 0 || param.point.y < 0) {
+            legend.style.display = 'none';
             legend.innerHTML = '';
             return;
         }
+
+        legend.style.display = 'block';
 
         const date = new Date(param.time * 1000);
         const hh = String(date.getHours()).padStart(2, '0');
