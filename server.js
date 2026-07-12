@@ -54,8 +54,8 @@ async function loadCSV() {
     const date = tradingDate || parts[0].trim();
     const contract = parts[1].trim();
     
-    // Only load TXO (Taiwan Index Options) contracts as requested
-    if (contract !== 'TXO') continue;
+    // Load all contracts to allow user to select different commodities
+    // if (contract !== 'TXO') continue;
 
     const strike = parts[2].trim();
     const expiry = parts[3].trim();
