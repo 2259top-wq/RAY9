@@ -182,11 +182,11 @@ function renderCharts(data) {
         }
     });
 
-    priceChartDay = createChart(els.chartContainerDay, dayData, els.noDataMsgDay);
-    priceChartNight = createChart(els.chartContainerNight, nightData, els.noDataMsgNight);
+    priceChartDay = createChart(els.chartContainerDay, dayData, els.noDataMsgDay, 'day');
+    priceChartNight = createChart(els.chartContainerNight, nightData, els.noDataMsgNight, 'night');
 }
 
-function createChart(container, data, msgEl) {
+function createChart(container, data, msgEl, sessionType) {
     if (!data || data.length === 0) {
         msgEl.textContent = '此時段無交易資料。';
         msgEl.classList.remove('hidden');
@@ -271,7 +271,14 @@ function createChart(container, data, msgEl) {
     candleSeries.setData(data);
 
     // Add Opening Price Reference Line
-    const sessionOpenPrice = data[0].open;
+    let openCandle = data[0];
+    if (sessionType === 'day') {
+        openCandle = data.find(d => d.hhmm >= 845) || data[0];
+    } else if (sessionType === 'night') {
+        openCandle = data.find(d => d.hhmm >= 1500) || data[0];
+    }
+    const sessionOpenPrice = openCandle.open;
+
     candleSeries.createPriceLine({
         price: sessionOpenPrice,
         color: '#2563eb', // Blue for reference
