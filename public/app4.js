@@ -497,6 +497,8 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         const mm = String(date.getMinutes()).padStart(2, '0');
         
         let html = `<div style="font-weight: 600; font-size: 16px; margin-bottom: 4px; color: #1e293b;">${hh}:${mm}</div>`;
+        let sumPrice = 0;
+        let validCount = 0;
         
         activeSeries.forEach(s => {
             let priceData = param.seriesData.get(s.priceSeries);
@@ -517,6 +519,8 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
             const vol = volData !== undefined ? volData.value : '0';
             
             if (price !== 'N/A') {
+                sumPrice += parseFloat(price);
+                validCount++;
                 const titleStr = s.title ? `${s.title}: ` : '';
                 html += `<div style="color: ${s.colorLine}; font-weight: 500; display: flex; align-items: baseline; gap: 8px;">
                     <span>${titleStr}$${price}</span>
@@ -524,6 +528,13 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
                 </div>`;
             }
         });
+        
+        if (validCount === 2 && activeSeries.length > 1) {
+            html += `<div style="color: #8b5cf6; font-weight: 600; margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(0,0,0,0.1);">
+                <span>總和 (C+P): $${sumPrice.toFixed(2)}</span>
+            </div>`;
+        }
+        
         legend.innerHTML = html;
     });
 
