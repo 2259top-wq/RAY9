@@ -58,8 +58,31 @@
                     <span class="btn-text">查詢資料</span>
                     <div class="spinner hidden"></div>
                 </button>
+
+                <button id="batch-export-btn" class="secondary-btn" style="margin-top: 10px; width: 100%; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; padding: 12px; cursor: pointer; transition: all 0.3s ease; background-color: #f1f5f9;">
+                    <span class="btn-text">📸 批次輸出多日圖片</span>
+                    <div class="spinner hidden"></div>
+                </button>
             </div>
         </aside>
+
+        <!-- Batch Export Modal -->
+        <div id="export-modal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+            <div class="modal-content glass-card" style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; max-height: 80vh; display: flex; flex-direction: column;">
+                <h2 style="margin-top: 0;">選擇要匯出的日期</h2>
+                <p style="color: #64748b; font-size: 14px;">一次勾選多天，系統將自動為您繪圖並下載（會依照目前的合約/履約價等設定）。</p>
+                <div style="margin-bottom: 10px;">
+                    <label style="cursor:pointer;"><input type="checkbox" id="export-select-all"> 全選</label>
+                </div>
+                <div id="export-date-list" style="overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                    <!-- Checkboxes -->
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="export-confirm-btn" class="primary-btn" style="flex: 1;">開始輸出</button>
+                    <button id="export-cancel-btn" class="secondary-btn" style="flex: 1; border: 1px solid #ccc;">取消</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content Area -->
         <main class="main-content">
