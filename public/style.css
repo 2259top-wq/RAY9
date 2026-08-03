@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 2259top-wq
+ * All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of 2259top-wq.
+ * You shall not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into with 2259top-wq.
+ */
+
 :root {
     --bg-dark: #f5f5f7;
     --bg-card: #ffffff;
@@ -102,7 +111,7 @@ body {
 }
 
 .select-wrapper::after {
-    content: '▼';
+    content: '??;
     font-size: 0.7rem;
     color: var(--text-muted);
     position: absolute;

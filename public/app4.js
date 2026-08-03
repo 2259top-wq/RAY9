@@ -1,7 +1,16 @@
+/*
+ * Copyright (c) 2026 2259top-wq
+ * All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of 2259top-wq.
+ * You shall not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into with 2259top-wq.
+ */
+
 const API_BASE = '/api';
 
 console.log("=== Options Backtester v10 ===");
-// alert("如果你看到這個彈跳視窗，代表你已經成功更新到最新版 v10！");
+// alert("憒?雿??圈?頝唾?蝒?隞?”雿歇蝬???啣??啁? v10嚗?);
 
 // UI Elements
 const els = {
@@ -79,8 +88,8 @@ async function init() {
 
     } catch (err) {
         console.error('Failed to load options:', err);
-        els.noDataMsgDay.textContent = '無法連接到伺服器，請確認 server.js 已啟動。';
-        els.noDataMsgNight.textContent = '無法連接到伺服器，請確認 server.js 已啟動。';
+        els.noDataMsgDay.textContent = '?⊥????唬撩?嚗?蝣箄? server.js 撌脣???;
+        els.noDataMsgNight.textContent = '?⊥????唬撩?嚗?蝣箄? server.js 撌脣???;
     }
 }
 
@@ -172,9 +181,9 @@ async function handleQuery() {
         
     } catch (err) {
         console.error('Query failed:', err);
-        els.noDataMsgDay.textContent = '資料取得失敗。';
+        els.noDataMsgDay.textContent = '鞈???憭望???;
         els.noDataMsgDay.classList.remove('hidden');
-        els.noDataMsgNight.textContent = '資料取得失敗。';
+        els.noDataMsgNight.textContent = '鞈???憭望???;
         els.noDataMsgNight.classList.remove('hidden');
     } finally {
         // Reset UI
@@ -213,7 +222,7 @@ function formatWatermarkDate(dateStr) {
     const mm = parseInt(dateStr.substring(4, 6), 10) - 1;
     const dd = parseInt(dateStr.substring(6, 8), 10);
     const d = new Date(yyyy, mm, dd);
-    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const weekdays = ['????, '??銝', '??鈭?, '??銝?, '????, '??鈭?, '????];
     const weekday = weekdays[d.getDay()];
     return `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')} (${weekday})`;
 }
@@ -317,7 +326,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
     const hasSingleData = !isOverlay && chartDataObj.data && chartDataObj.data.length > 0;
 
     if (!hasSingleData && !hasDataC && !hasDataP) {
-        msgEl.textContent = '此時段無交易資料。';
+        msgEl.textContent = '甇斗?畾萇鈭斗?鞈???;
         msgEl.classList.remove('hidden');
         return null;
     } else {
@@ -539,7 +548,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         
         if (validCount === 2 && activeSeries.length > 1) {
             html += `<div style="color: #8b5cf6; font-weight: 600; margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(0,0,0,0.1);">
-                <span>總和 (C+P): $${sumPrice.toFixed(2)}</span>
+                <span>蝮賢? (C+P): $${sumPrice.toFixed(2)}</span>
             </div>`;
         }
         
@@ -557,7 +566,7 @@ init();
 \nconst API_BASE = '/api';
 
 console.log("=== Options Backtester v10 ===");
-// alert("如果你看到這個彈跳視窗，代表你已經成功更新到最新版 v10！");
+// alert("憒?雿??圈?頝唾?蝒?隞?”雿歇蝬???啣??啁? v10嚗?);
 
 // UI Elements
 const els = {
@@ -639,10 +648,10 @@ async function init() {
                         location.reload();
                     }
                 } else {
-                    alert('下載失敗: ' + result.message);
+                    alert('銝?憭望?: ' + result.message);
                 }
             } catch (err) {
-                alert('下載時發生錯誤: ' + err.message);
+                alert('銝???隤? ' + err.message);
             } finally {
                 btn.disabled = false;
                 text.style.display = 'block';
@@ -674,7 +683,7 @@ async function init() {
             exportListDiv.innerHTML = '';
             // options.dates has all available dates from the server
             // Convert options from select dropdown since it represents current state
-            const availableDates = Array.from(els.dateSelect.options).map(o => o.value).filter(v => v !== '載入中...');
+            const availableDates = Array.from(els.dateSelect.options).map(o => o.value).filter(v => v !== '頛銝?..');
             
             availableDates.forEach(d => {
                 const lbl = document.createElement('label');
@@ -708,7 +717,7 @@ async function init() {
             const cbs = document.querySelectorAll('.export-date-cb:checked');
             const selectedDates = Array.from(cbs).map(cb => cb.value);
             if (selectedDates.length === 0) {
-                alert('請至少選擇一天！');
+                alert('隢撠??憭抬?');
                 return;
             }
             
@@ -749,10 +758,10 @@ async function init() {
                         await new Promise(r => setTimeout(r, 300));
                     }
                 }
-                alert(`已完成 ${selectedDates.length} 天的圖片輸出！`);
+                alert(`撌脣???${selectedDates.length} 憭拍???頛詨嚗);
             } catch (err) {
                 console.error('Batch export failed:', err);
-                alert('輸出時發生錯誤：' + err.message);
+                alert('頛詨??隤歹?' + err.message);
             } finally {
                 batchBtn.disabled = false;
                 btnText.style.display = 'block';
@@ -765,8 +774,8 @@ async function init() {
 
     } catch (err) {
         console.error('Failed to load options:', err);
-        els.noDataMsgDay.textContent = '無法連接到伺服器，請確認 server.js 已啟動。';
-        els.noDataMsgNight.textContent = '無法連接到伺服器，請確認 server.js 已啟動。';
+        els.noDataMsgDay.textContent = '?⊥????唬撩?嚗?蝣箄? server.js 撌脣???;
+        els.noDataMsgNight.textContent = '?⊥????唬撩?嚗?蝣箄? server.js 撌脣???;
     }
 }
 
@@ -858,9 +867,9 @@ async function handleQuery() {
         
     } catch (err) {
         console.error('Query failed:', err);
-        els.noDataMsgDay.textContent = '資料取得失敗。';
+        els.noDataMsgDay.textContent = '鞈???憭望???;
         els.noDataMsgDay.classList.remove('hidden');
-        els.noDataMsgNight.textContent = '資料取得失敗。';
+        els.noDataMsgNight.textContent = '鞈???憭望???;
         els.noDataMsgNight.classList.remove('hidden');
     } finally {
         // Reset UI
@@ -899,7 +908,7 @@ function formatWatermarkDate(dateStr) {
     const mm = parseInt(dateStr.substring(4, 6), 10) - 1;
     const dd = parseInt(dateStr.substring(6, 8), 10);
     const d = new Date(yyyy, mm, dd);
-    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const weekdays = ['????, '??銝', '??鈭?, '??銝?, '????, '??鈭?, '????];
     const weekday = weekdays[d.getDay()];
     return `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')} (${weekday})`;
 }
@@ -1003,7 +1012,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
     const hasSingleData = !isOverlay && chartDataObj.data && chartDataObj.data.length > 0;
 
     if (!hasSingleData && !hasDataC && !hasDataP) {
-        msgEl.textContent = '此時段無交易資料。';
+        msgEl.textContent = '甇斗?畾萇鈭斗?鞈???;
         msgEl.classList.remove('hidden');
         return null;
     } else {
@@ -1225,7 +1234,7 @@ function createChart(container, chartDataObj, msgEl, sessionType, watermarkText)
         
         if (validCount === 2 && activeSeries.length > 1) {
             html += `<div style="color: #8b5cf6; font-weight: 600; margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(0,0,0,0.1);">
-                <span>總和 (C+P): $${sumPrice.toFixed(2)}</span>
+                <span>蝮賢? (C+P): $${sumPrice.toFixed(2)}</span>
             </div>`;
         }
         
@@ -1279,12 +1288,12 @@ btnExportCancel.addEventListener('click', () => {
 btnExportConfirm.addEventListener('click', async () => {
     const selectedDates = Array.from(document.querySelectorAll('.export-date-checkbox:checked')).map(cb => cb.value);
     if (selectedDates.length === 0) {
-        alert('請至少選擇一天！');
+        alert('隢撠??憭抬?');
         return;
     }
     
     btnExportConfirm.disabled = true;
-    btnExportConfirm.textContent = '輸出中...';
+    btnExportConfirm.textContent = '頛詨銝?..';
     
     const originalDate = els.dateSelect.value;
     
@@ -1297,12 +1306,12 @@ btnExportConfirm.addEventListener('click', async () => {
         
         if (priceChartDay) {
             const dayCanvas = priceChartDay.takeScreenshot();
-            downloadCanvas(dayCanvas, `${dateVal}_日盤.png`);
+            downloadCanvas(dayCanvas, `${dateVal}_?亦.png`);
         }
         
         if (priceChartNight) {
             const nightCanvas = priceChartNight.takeScreenshot();
-            downloadCanvas(nightCanvas, `${dateVal}_夜盤.png`);
+            downloadCanvas(nightCanvas, `${dateVal}_憭.png`);
         }
     }
     
@@ -1311,11 +1320,11 @@ btnExportConfirm.addEventListener('click', async () => {
     await fetchData();
     
     btnExportConfirm.disabled = false;
-    btnExportConfirm.textContent = '開始輸出';
+    btnExportConfirm.textContent = '??頛詨';
     exportModal.style.opacity = '0';
     exportModal.style.pointerEvents = 'none';
     exportModal.classList.add('hidden');
-    alert('✅ 批次輸出完成！');
+    alert('???寞活頛詨摰?嚗?);
 });
 
 function downloadCanvas(canvas, filename) {
